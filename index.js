@@ -1,38 +1,20 @@
 var express=require("express"),
-	mongoose= require('mongoose');
+	mongoose= require('mongoose'),
+	bodyParser = require('body-parser');
 
 var db=mongoose.connect('mongodb://localhost/bookAPI');
-
 var Book = require('./models/bookModel');
+
 var app= express();
 
 var port =process.env.PORT || 3000;
+//install body-parser
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
+bookRouter = require('./Routes/bookRoutes')(Book);
 
-var bookRouter = express.Router();
-bookRouter.route('/Books')
-	.get(function(req,res){
-		var query = {};
-		if (req.query.genre) {
-			query.genre = req.query.genre;
-		}
-		Book.find(query,function(err,books){
-			if (err) {
-				res.status(500).send(err);
-			}
-			res.json(books);
-		});
-	});
-bookRouter.route('/Books/:bookId')
-	.get(function(req,res){
-		Book.findById(req.params.bookId,function(err,book){
-			if (err) {
-				res.status(500).send(err);
-			} else{
-				res.json(book);
-			}
-		});
-	});
-app.use('/api',bookRouter);
+app.use('/api/books',bookRouter);
+//app.use('/api/authors',authorRouter);
 
 app.get("/", function(req,res){
 	res.send("Welcome to my api bwai");
